@@ -8,6 +8,7 @@ namespace Domains_Scraper.Models
 {
     public class OrganicChartData
     {
+        public int Id { get; set; }
         public DateTime Date { get; set; }
         public int TopThree { get; set; }
         public int FourToTen { get; set; }

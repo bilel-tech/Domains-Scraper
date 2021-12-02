@@ -118,10 +118,10 @@ namespace Domains_Scraper.Services
                     }
                     var traffic = (int)result.SelectToken("organicTraffic");
                     var keyWords = (int)result.SelectToken("organicPositions");
-                    organicTrafficAndKeywordsByCountries.Add(new OrganicTrafficAndKeywordsByCountry { Country = country, OranicTraicValue = traffic, KeyWordsValue = keyWords });
+                    organicTrafficAndKeywordsByCountries.Add(new OrganicTrafficAndKeywordsByCountry { Country = country, OranicTraficValue = traffic, KeyWordsValue = keyWords });
                 }
                 var xxxx = organicTrafficAndKeywordsByCountries;
-                organicTrafficAndKeywordsByCountries = organicTrafficAndKeywordsByCountries.OrderByDescending(x => x.OranicTraicValue).ToList();
+                organicTrafficAndKeywordsByCountries = organicTrafficAndKeywordsByCountries.OrderByDescending(x => x.OranicTraficValue).ToList();
                 return organicTrafficAndKeywordsByCountries;
             }
             catch (Exception ex)

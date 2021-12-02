@@ -1,4 +1,8 @@
+using Domains_Scraper.Entity_Framework_folder;
+using Domains_Scraper.Models;
 using Domains_Scraper.Services;
+using Newtonsoft.Json;
+using static Domains_Scraper.Entity_Framework_folder.LibraryModel;
 
 namespace Domains_Scraper
 {
@@ -9,10 +13,28 @@ namespace Domains_Scraper
             InitializeComponent();
         }
 
-        
+
         private async void Start_Click(object sender, EventArgs e)
         {
+            InsertData();
+            return;
             await MainWork();
+        }
+        private static void InsertData()
+        {
+            using (var context = new LibraryContext())
+            {
+                var domain = JsonConvert.DeserializeObject<SemrushDomain>(File.ReadAllText("json.txt"));
+                //var domains = new List<SemrushDomain> { domain, domain, domain, domain, domain, domain };
+                var domains = new List<SemrushDomain>();
+                for (int i = 0; i < 1; i++)
+                {
+                    domains.Add(domain);
+                }
+                //var listOfListOfDoamins = new List<List<SemrushDomain>> { domains, domains, domains, domains, domains, domains, domains, domains, domains, domains, domains, domains };
+                context.SemrushDomain.AddRange(domains);
+                context.SaveChanges();
+            }
         }
         private async Task MainWork()
         {

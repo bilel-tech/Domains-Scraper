@@ -8,8 +8,9 @@ namespace Domains_Scraper.Models
 {
     public class OrganicTrafficAndKeywordsByCountry
     {
-        public string? Country { get; set; }
-        public int OranicTraicValue { get; set; }
+        public int Id { get; set; }
+        public string Country { get; set; }
+        public int OranicTraficValue { get; set; }
         public int KeyWordsValue { get; set; }
     }
 }
