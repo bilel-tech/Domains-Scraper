@@ -33,7 +33,7 @@ namespace Domains_Scraper
                 }
                 //var listOfListOfDoamins = new List<List<SemrushDomain>> { domains, domains, domains, domains, domains, domains, domains, domains, domains, domains, domains, domains };
                 context.SemrushDomain.AddRange(domains);
-                context.SaveChanges();
+                context.SaveChanges(); 
             }
         }
         private async Task MainWork()
