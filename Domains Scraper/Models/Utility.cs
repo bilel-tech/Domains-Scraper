@@ -1,4 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using Domains_Scraper.Entity_Framework_folder;
+using Domains_Scraper.Services;
+using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
+using Newtonsoft.Json;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using OfficeOpenXml.Table;
@@ -6,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using LicenseContext = OfficeOpenXml.LicenseContext;
@@ -57,9 +62,9 @@ namespace Domains_Scraper.Models
         }
 
     }
-    public static class Save
+    public static class SaveToExcel
     {
-        public static async void SaveToExcel<T2>(this List<T2> objects, string path)
+        public static async void Save<T2>(this List<T2> objects, string path)
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             var excelPkg = new ExcelPackage(new FileInfo(path));
@@ -110,9 +115,141 @@ namespace Domains_Scraper.Models
             await excelPkg.SaveAsync();
         }
 
-        public static async void Bilel<T2>(this List<T2> objects, string path)
+        
+    }
+    public static class InsertAndUpdateExtenstion
+    {
+        public static async Task BulkInsert<T>(this LibraryContext dbContext, List<T> models, int batch = 1000) where T : class
         {
-            Console.WriteLine(@"hi");
+            var table = dbContext.Model.FindEntityType(typeof(T)).GetTableName;
+            var fieldsSql = new StringBuilder($"insert into {table} (");
+            var properties = new List<PropertyInfo>();
+            foreach (var propertyInfo in typeof(T).GetProperties())
+            {
+                if (propertyInfo.Name.Equals("Id")) continue;
+                Type t = propertyInfo.PropertyType;
+                if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
+                {
+                    if (t.GetGenericArguments()[0] != typeof(int))
+                        continue;
+                }
+                else if (Type.GetTypeCode(t) == TypeCode.Object)
+                {
+                    continue;
+                }
+                properties.Add(propertyInfo);
+                fieldsSql.Append("`" + propertyInfo.Name + "`").Append(",");
+            }
+            fieldsSql.Remove(fieldsSql.Length - 1, 1);
+            fieldsSql.Append(") values");
+
+            var sql = new StringBuilder(fieldsSql.ToString());
+            int inserted = 0;
+            for (var i = 0; i < models.Count; i++)
+            {
+                var model = models[i];
+
+                sql.Append("\n(");
+                foreach (var propertyInfo in properties)
+                {
+                    string val = propertyInfo.GetValue(model)?.ToString() ?? "null";
+
+                    if (propertyInfo.PropertyType == typeof(DateTime))
+                    {
+                        sql.Append($"'{((DateTime)propertyInfo.GetValue(model)):yyyy-MM-dd H:mm:ss}',");
+                    }
+                    else if (propertyInfo.PropertyType == typeof(string))
+                    {
+                        sql.Append($"'{MySqlHelper.EscapeString(val)}',");
+                    }
+                    else if (propertyInfo.PropertyType.IsEnum)
+                    {
+                        sql.Append((int)propertyInfo.GetValue(model, null)).Append(",");
+                    }
+                    else
+                    {
+                        sql.Append(MySqlHelper.EscapeString(val)).Append(",");
+                    }
+                }
+                sql.Remove(sql.Length - 1, 1);
+                sql.Append("),");
+                inserted++;
+                if ((inserted % batch == 0) || i == models.Count - 1)
+                {
+                    sql.Remove(sql.Length - 1, 1);
+                    sql.Append(";");
+                    Console.WriteLine(sql);
+                    Console.WriteLine(Singleton.ConnectionString);
+
+                    using (MySqlConnection connection = new MySqlConnection(Singleton.ConnectionString))
+                    {
+                        await connection.OpenAsync();
+                        using (MySqlCommand cmd = new MySqlCommand(sql.ToString(), connection))
+                        {
+                            var x = await cmd.ExecuteNonQueryAsync();
+                            Console.WriteLine($"insert {x}");
+                        }
+                    }
+
+                    sql = new StringBuilder(fieldsSql.ToString());
+                    inserted = 0;
+                }
+            }
+        }
+
+        public static async Task BulkUpdate<T>(this LibraryContext dbContext, List<T> models, List<string> propertiesToCheck, int batch = 1000) where T : class
+        {
+            var table = dbContext.Model.FindEntityType(typeof(T)).GetTableName;
+            var properties = typeof(T).GetProperties().Where(x => propertiesToCheck.Contains(x.Name));
+            var propertyId = typeof(T).GetProperty("Id");
+            var sql = new StringBuilder("");
+            int inserted = 0;
+            for (var i = 0; i < models.Count; i++)
+            {
+                var model = models[i];
+
+                sql.Append($"update {table} set ");
+                foreach (var propertyInfo in properties)
+                {
+                    sql.Append($"`{propertyInfo.Name}`").Append(" = ");
+                    string val = propertyInfo.GetValue(model)?.ToString() ?? "null";
+
+                    if (propertyInfo.PropertyType == typeof(DateTime))
+                    {
+                        sql.Append($"'{((DateTime)propertyInfo.GetValue(model)):yyyy-MM-dd H:mm:ss}',");
+                    }
+                    else if (propertyInfo.PropertyType == typeof(string))
+                    {
+                        sql.Append($"'{MySqlHelper.EscapeString(val)}',");
+                    }
+                    else
+                    {
+                        sql.Append(MySqlHelper.EscapeString(val)).Append(",");
+                    }
+                }
+                sql.Remove(sql.Length - 1, 1);
+                sql.Append($" where Id={propertyId.GetValue(model)};\n");
+
+                inserted++;
+                if ((inserted % batch == 0) || i == models.Count - 1)
+                {
+                    Console.WriteLine(sql);
+                    Console.WriteLine(Singleton.ConnectionString);
+
+                    using (MySqlConnection connection = new MySqlConnection(Singleton.ConnectionString))
+                    {
+                        await connection.OpenAsync();
+                        using (MySqlCommand cmd = new MySqlCommand(sql.ToString(), connection))
+                        {
+                            var x = await cmd.ExecuteNonQueryAsync();
+                            Console.WriteLine($"insert {x}");
+                        }
+                    }
+
+                    sql = new StringBuilder();
+                    inserted = 0;
+                }
+            }
         }
     }
 }

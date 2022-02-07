@@ -19,15 +19,15 @@ namespace Domains_Scraper.Services
         public async static Task GetData()
         {
             Reporter.Log("Start scraping domains from semrush.com");
-            var tpl = new TransformBlock<string, SemrushDomain>(async x => await StartScraping(x).ConfigureAwait(false), new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = 1 });
-            foreach (var domain in _domains)
-            {
-                tpl.Post(domain);
-            }
+            //var tpl = new TransformBlock<string, SemrushDomain>(async x => await StartScraping(x).ConfigureAwait(false), new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = 1 });
+            //foreach (var domain in _domains)
+            //{
+            //    tpl.Post(domain);
+            //}
 
-            for (int i = 0; i < _domains.Count; i++)
+            for (int i = 0; i < Singleton.Domains.Count; i++)
             {
-                var domainSemRush = await tpl.ReceiveAsync().ConfigureAwait(false);
+                var domainSemRush = await StartScraping(Singleton.Domains[i]);
                 if (domainSemRush != null)
                 {
                     Singleton.SemrushDomains.Add(domainSemRush);
@@ -142,10 +142,6 @@ namespace Domains_Scraper.Services
             organicData.OrganicKeywords = organicData.OneYearOrganicData.OneYearOrganicKeyWordsChartData.Last().Total;
             organicData.OrganicTraffic = organicData.OneYearOrganicData.OneYearOrganicTrafficChartData.Last().OrganicTrafficValue;
             organicData.OrganicPositionsDistrubution = await GetOrganicPositionsDistributionData(domainName);
-
-
-
-
             return organicData;
         }
 

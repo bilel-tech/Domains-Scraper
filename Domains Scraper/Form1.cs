@@ -1,8 +1,8 @@
 using Domains_Scraper.Entity_Framework_folder;
 using Domains_Scraper.Models;
 using Domains_Scraper.Services;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using static Domains_Scraper.Entity_Framework_folder.LibraryModel;
 
 namespace Domains_Scraper
 {
@@ -16,24 +16,51 @@ namespace Domains_Scraper
 
         private async void Start_Click(object sender, EventArgs e)
         {
+            Console.WriteLine("start");
             InsertData();
-            return;
-            await MainWork();
+            #region SaveOrUpdateRegion
+            //using (var context = new LibraryContext())
+            //{
+            //    var domain = context.SemrushDomain.FirstOrDefault(item => item.Name == "upwork.com");
+            //    if (domain != null)
+            //    {
+            //        var dd = context.SemrushDomain.Include(i => i.OrganicData.OrganicPositionsDistrubution)
+            //            .Include(i => i.OrganicData.OrganicTrafficAndKeywordsByCountry)
+            //            .Include(i => i.FollowLinksVsNotFollowLink)
+            //            .Include(i => i.BacklinkType)
+            //           .Where(item => item.Name == domain.Name).FirstOrDefault();
+            //        dd = context.SemrushDomain.Include(i => i.OrganicData.AllTimeOrganicData.AllTimeOrganicTrafficChartData)
+            //            .Include(i => i.OrganicData.AllTimeOrganicData.AllTimeOrganicKeyWordsChartData)
+            //           .Where(item => item.Name == domain.Name).FirstOrDefault();
+            //        dd = context.SemrushDomain.Include(i => i.OrganicData.OneYearOrganicData.OneYearOrganicKeyWordsChartData)
+            //           .Include(i => i.OrganicData.OneYearOrganicData.OneYearOrganicTrafficChartData)
+            //          .Where(item => item.Name == domain.Name).FirstOrDefault();
+            //        context.SemrushDomain.Update(domain);
+            //        // Save changes in database
+            //        context.SaveChanges();
+            //    }
+            //}
+            //return;
+            #endregion
+            await AddParaMetersToSemRush();
+            await Task.Run(MainWork);
+            SaveOrUpdateSemrushDatBase();
         }
-        private static void InsertData()
+        private static async void InsertData()
         {
             using (var context = new LibraryContext())
             {
                 var domain = JsonConvert.DeserializeObject<SemrushDomain>(File.ReadAllText("json.txt"));
                 //var domains = new List<SemrushDomain> { domain, domain, domain, domain, domain, domain };
                 var domains = new List<SemrushDomain>();
-                for (int i = 0; i < 1; i++)
+                for (int i = 0; i < 2; i++)
                 {
                     domains.Add(domain);
                 }
+               await context.BulkInsert(domains);
                 //var listOfListOfDoamins = new List<List<SemrushDomain>> { domains, domains, domains, domains, domains, domains, domains, domains, domains, domains, domains, domains };
                 context.SemrushDomain.AddRange(domains);
-                context.SaveChanges(); 
+                context.SaveChanges();
             }
         }
         private async Task MainWork()
@@ -41,10 +68,42 @@ namespace Domains_Scraper
 
             //InsertData();
             //return;
-            await AddParaMetersToSemRush();
+            await GetDomainsToScrapeFromDatbase();
             var semrushTask = SemrushServices.GetData();
             await Task.WhenAll(semrushTask);
         }
+
+        private void SaveOrUpdateSemrushDatBase()
+        {
+            using (var context = new LibraryContext())
+            {
+                var domain = context.SemrushDomain.FirstOrDefault(item => item.Name == "upwork.com");
+                if (domain != null)
+                {
+                    var dd = context.SemrushDomain.Include(i => i.OrganicData.OrganicPositionsDistrubution)
+                        .Include(i => i.OrganicData.OrganicTrafficAndKeywordsByCountry)
+                        .Include(i => i.FollowLinksVsNotFollowLink)
+                        .Include(i => i.BacklinkType)
+                       .Where(item => item.Name == domain.Name).FirstOrDefault();
+                    dd = context.SemrushDomain.Include(i => i.OrganicData.AllTimeOrganicData.AllTimeOrganicTrafficChartData)
+                        .Include(i => i.OrganicData.AllTimeOrganicData.AllTimeOrganicKeyWordsChartData)
+                       .Where(item => item.Name == domain.Name).FirstOrDefault();
+                    dd = context.SemrushDomain.Include(i => i.OrganicData.OneYearOrganicData.OneYearOrganicKeyWordsChartData)
+                       .Include(i => i.OrganicData.OneYearOrganicData.OneYearOrganicTrafficChartData)
+                      .Where(item => item.Name == domain.Name).FirstOrDefault();
+                    //context.SemrushDomain.Update(domain);
+                    // Save changes in database
+                    context.SaveChanges();
+                }
+            }
+        }
+
+        private async Task GetDomainsToScrapeFromDatbase()
+        {
+            await Task.Delay(1);
+            Singleton.Domains.Add("upwork.com");
+        }
+
         private async Task AddParaMetersToSemRush()
         {
             //var formLogIn = "{\"locale\":\"en\",\"source\":\"semrush\",\"g-recaptcha-response\":\"\",\"user-agent-hash\":\"7000108f0743214a82aeaaa4b5e796d8\",\"email\":\"shahid@houseofcomms.com\",\"password\":\"temp@HOC123\"}";
@@ -68,7 +127,6 @@ namespace Domains_Scraper
             //var obj = JObject.Parse(json);
             //var authorityScore = (string)obj.SelectToken("..authorityScore");
             var list = await SemrushServices.StartScraping("upwork.com");
-
         }
     }
 }
