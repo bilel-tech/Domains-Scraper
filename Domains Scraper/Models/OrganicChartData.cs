@@ -9,12 +9,14 @@ namespace Domains_Scraper.Models
     public class OrganicChartData
     {
         public int Id { get; set; }
+        public int OneYearOrganicDataId { get; set; }
+        public int AllTimeOrganicDataId { get; set; }
         public DateTime Date { get; set; }
-        public int TopThree { get; set; }
-        public int FourToTen { get; set; }
-        public int ElevenToTwenty { get; set; }
-        public int TwentyOneToFifty { get; set; }
-        public int FiftyOneToOneHundred { get; set; }
-        public int Total { get; set; }
+        public long TopThree { get; set; }
+        public long FourToTen { get; set; }
+        public long ElevenToTwenty { get; set; }
+        public long TwentyOneToFifty { get; set; }
+        public long FiftyOneToOneHundred { get; set; }
+        public long Total { get; set; }
     }
 }

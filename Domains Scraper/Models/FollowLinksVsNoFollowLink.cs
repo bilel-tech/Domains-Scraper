@@ -9,7 +9,7 @@ namespace Domains_Scraper.Models
     public class FollowLinksVsNoFollowLink
     {
         public int Id { get; set; }
-        public int FollowLinks { get; set; }
-        public int NotFollowLinks { get; set; }
+        public long FollowLinks { get; set; }
+        public long NotFollowLinks { get; set; }
     }
 }

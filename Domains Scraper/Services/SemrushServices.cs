@@ -48,8 +48,6 @@ namespace Domains_Scraper.Services
             domain.FollowLinksVsNotFollowLink = followVsNotFollowLinksAndBacklinkType.fVsNotF;
             domain.BacklinkType = followVsNotFollowLinksAndBacklinkType.backlinkType;
 
-            var json = JsonConvert.SerializeObject(domain, Formatting.Indented);
-            File.WriteAllText("json.txt", json);
             return domain;
 
         }
@@ -76,12 +74,12 @@ namespace Domains_Scraper.Services
                 var json = await HttpCaller.PostJson(url, jsonFormData);
                 var obj = JObject.Parse(json);
 
-                fVsNotF.FollowLinks = (int)obj.SelectToken(".result.follow");
-                fVsNotF.NotFollowLinks = (int)obj.SelectToken(".result.nofollow");
-                backlinkType.TextLinks = (int)obj.SelectToken(".result.texts");
-                backlinkType.FrameLinks = (int)obj.SelectToken(".result.frames");
-                backlinkType.FormLinks = (int)obj.SelectToken(".result.forms");
-                backlinkType.ImageLinks = (int)obj.SelectToken(".result.images");
+                fVsNotF.FollowLinks = (long)obj.SelectToken(".result.follow");
+                fVsNotF.NotFollowLinks = (long)obj.SelectToken(".result.nofollow");
+                backlinkType.TextLinks = (long)obj.SelectToken(".result.texts");
+                backlinkType.FrameLinks = (long)obj.SelectToken(".result.frames");
+                backlinkType.FormLinks = (long)obj.SelectToken(".result.forms");
+                backlinkType.ImageLinks = (long)obj.SelectToken(".result.images");
                 return (fVsNotF, backlinkType);
             }
             catch (Exception e)
@@ -261,12 +259,12 @@ namespace Domains_Scraper.Services
                     dt = dt.Insert(4, "/");
                     dt = dt.Insert(7, "/");
                     var date = DateTime.Parse(dt);
-                    var organicTrafficValue = (int)result.SelectToken("organicTraffic");
+                    var organicTrafficValue = (long)result.SelectToken("organicTraffic");
                     var positions = result.SelectToken("organicPositionsTrend");
-                    var topThree = (int)positions[0];
-                    var fourToTen = (int)positions[1];
-                    var elevenToTwenty = (int)positions[2];
-                    var twentyOneToFifty = (int)positions[3] + (int)positions[4] + (int)positions[5];
+                    var topThree = (long)positions[0];
+                    var fourToTen = (long)positions[1];
+                    var elevenToTwenty = (long)positions[2];
+                    var twentyOneToFifty = (long)positions[3] + (long)positions[4] + (long)positions[5];
                     var fiftyOneToOneHundred = (int)positions[6] + (int)positions[7] + (int)positions[8] + (int)positions[9] + (int)positions[10];
                     var total = topThree + fourToTen + elevenToTwenty + twentyOneToFifty + fiftyOneToOneHundred;
                     organicKeyWordsChartData.Add(new OrganicChartData { Date = date, TopThree = topThree, FourToTen = fourToTen, ElevenToTwenty = elevenToTwenty, TwentyOneToFifty = twentyOneToFifty, FiftyOneToOneHundred = fiftyOneToOneHundred, Total = total });
@@ -289,13 +287,21 @@ namespace Domains_Scraper.Services
                 foreach (var result in results)
                 {
 
-                    var dt = (string)result.SelectToken("date");
-                    dt = dt.Insert(4, "/");
-                    dt = dt.Insert(7, "/");
-                    var date = DateTime.Parse(dt);
-                    var organicTrafficValue = (int)result.SelectToken("organicTraffic");
-                    var paidTrafficValue = (int)result.SelectToken("adwordsTraffic");
-                    organicTrafficChartDatas.Add(new OrganicTrafficChartData { Date = date, OrganicTrafficValue = organicTrafficValue, PaidTrafficValue = paidTrafficValue });
+                    try
+                    {
+                        var dt = (string)result.SelectToken("date");
+                        dt = dt.Insert(4, "/");
+                        dt = dt.Insert(7, "/");
+                        var date = DateTime.Parse(dt);
+                        var organicTrafficValue = (long)result.SelectToken("organicTraffic");
+                        var paidTrafficValue = (long)result.SelectToken("adwordsTraffic");
+                        organicTrafficChartDatas.Add(new OrganicTrafficChartData { Date = date, OrganicTrafficValue = organicTrafficValue, PaidTrafficValue = paidTrafficValue });
+                    }
+                    catch (Exception)
+                    {
+
+                        var g = (string)result.SelectToken("organicTraffic");
+                    }
                 }
                 return organicTrafficChartDatas;
             }

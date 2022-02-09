@@ -10,7 +10,7 @@ namespace Domains_Scraper.Models
     {
         public int Id { get; set; }
         public string Country { get; set; }
-        public int OranicTraficValue { get; set; }
-        public int KeyWordsValue { get; set; }
+        public long OranicTraficValue { get; set; }
+        public long KeyWordsValue { get; set; }
     }
 }

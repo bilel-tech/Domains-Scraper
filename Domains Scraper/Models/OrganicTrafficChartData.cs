@@ -9,8 +9,10 @@ namespace Domains_Scraper.Models
     public class OrganicTrafficChartData
     {
         public int Id { get; set; }
+        public int AllTimeOrganicDataId { get; set; }
+        public int OneYearOrganicDataId { get; set; }
         public DateTime Date { get; set; }
-        public int OrganicTrafficValue { get; set; }
-        public int PaidTrafficValue { get; set; }
+        public long OrganicTrafficValue { get; set; }
+        public long PaidTrafficValue { get; set; }
     }
 }

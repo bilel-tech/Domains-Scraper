@@ -8,6 +8,7 @@ using OfficeOpenXml.Style;
 using OfficeOpenXml.Table;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Reflection;
@@ -121,7 +122,7 @@ namespace Domains_Scraper.Models
     {
         public static async Task BulkInsert<T>(this LibraryContext dbContext, List<T> models, int batch = 1000) where T : class
         {
-            var table = dbContext.Model.FindEntityType(typeof(T)).GetTableName;
+            var table = dbContext.Model.FindEntityType(typeof(T)).GetTableName();
             var fieldsSql = new StringBuilder($"insert into {table} (");
             var properties = new List<PropertyInfo>();
             foreach (var propertyInfo in typeof(T).GetProperties())
@@ -148,7 +149,6 @@ namespace Domains_Scraper.Models
             for (var i = 0; i < models.Count; i++)
             {
                 var model = models[i];
-
                 sql.Append("\n(");
                 foreach (var propertyInfo in properties)
                 {
@@ -178,8 +178,8 @@ namespace Domains_Scraper.Models
                 {
                     sql.Remove(sql.Length - 1, 1);
                     sql.Append(";");
-                    Console.WriteLine(sql);
-                    Console.WriteLine(Singleton.ConnectionString);
+                    Debug.WriteLine(sql.ToString());
+                    Debug.WriteLine(Singleton.ConnectionString);
 
                     using (MySqlConnection connection = new MySqlConnection(Singleton.ConnectionString))
                     {

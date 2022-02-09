@@ -42,21 +42,22 @@ namespace Domains_Scraper
             //}
             //return;
             #endregion
-            await AddParaMetersToSemRush();
-            await Task.Run(MainWork);
+            //await AddParaMetersToSemRush();
+            //await Task.Run(MainWork);
             SaveOrUpdateSemrushDatBase();
         }
         private static async void InsertData()
         {
             using (var context = new LibraryContext())
             {
-                var domain = JsonConvert.DeserializeObject<SemrushDomain>(File.ReadAllText("json.txt"));
+                var domains = JsonConvert.DeserializeObject<List<SemrushDomain>>(File.ReadAllText("SemrushDomains.txt"));
+                //domain.OrganicDataId = 1;
+                //domain.FollowLinksVsNotFollowLinkId = 1;
+                //domain.BacklinkTypeId = 1;
+                //var jj=JsonConvert.SerializeObject(domain,Formatting.Indented);
+                //File.WriteAllText("json.txt", jj);
                 //var domains = new List<SemrushDomain> { domain, domain, domain, domain, domain, domain };
-                var domains = new List<SemrushDomain>();
-                for (int i = 0; i < 2; i++)
-                {
-                    domains.Add(domain);
-                }
+               
                await context.BulkInsert(domains);
                 //var listOfListOfDoamins = new List<List<SemrushDomain>> { domains, domains, domains, domains, domains, domains, domains, domains, domains, domains, domains, domains };
                 context.SemrushDomain.AddRange(domains);
@@ -68,7 +69,7 @@ namespace Domains_Scraper
 
             //InsertData();
             //return;
-            await GetDomainsToScrapeFromDatbase();
+            //await GetDomainsToScrapeFromDatbase();
             var semrushTask = SemrushServices.GetData();
             await Task.WhenAll(semrushTask);
         }
@@ -101,7 +102,7 @@ namespace Domains_Scraper
         private async Task GetDomainsToScrapeFromDatbase()
         {
             await Task.Delay(1);
-            Singleton.Domains.Add("upwork.com");
+            Singleton.Domains.Add("google.com");
         }
 
         private async Task AddParaMetersToSemRush()
@@ -126,7 +127,13 @@ namespace Domains_Scraper
             //json = await HttpCaller.PostJson(urlAuthority, formDataAuthorityScore);
             //var obj = JObject.Parse(json);
             //var authorityScore = (string)obj.SelectToken("..authorityScore");
-            var list = await SemrushServices.StartScraping("upwork.com");
+            var domains=new List<string> { "google.com" , "upwork.com" };
+            foreach (var domain in domains)
+            {
+                Singleton.SemrushDomains.Add(await SemrushServices.StartScraping(domain));
+            }
+            var json = JsonConvert.SerializeObject(Singleton.SemrushDomains, Formatting.Indented);
+            File.WriteAllText("SemrushDomains.txt", json);
         }
     }
 }
