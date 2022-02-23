@@ -16,7 +16,8 @@ namespace Domains_Scraper.Services
         public static string _apiKey;
         public static List<string> _domains;
         public static HttpCaller HttpCaller = new HttpCaller();
-        public async static Task GetData()
+        private static List<SemrushDomain> SemrushDomains = new List<SemrushDomain>();
+        public async static Task<List<SemrushDomain>> GetData(List<string> domains)
         {
             Reporter.Log("Start scraping domains from semrush.com");
             //var tpl = new TransformBlock<string, SemrushDomain>(async x => await StartScraping(x).ConfigureAwait(false), new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = 1 });
@@ -25,15 +26,17 @@ namespace Domains_Scraper.Services
             //    tpl.Post(domain);
             //}
 
-            for (int i = 0; i < Singleton.Domains.Count; i++)
+            for (int i = 0; i < domains.Count; i++)
             {
-                var domainSemRush = await StartScraping(Singleton.Domains[i]);
+                var domainSemRush = await StartScraping(domains[i]);
                 if (domainSemRush != null)
                 {
-                    Singleton.SemrushDomains.Add(domainSemRush);
+                    SemrushDomains.Add(domainSemRush);
                 }
-                Reporter.Progress(i + 1, _domains.Count, $@"Domain Scraped from semrush.com {i + 1}/{_domains.Count}");
+                Reporter.Progress(i + 1, domains.Count, $@"Domain Scraped from semrush.com {i + 1}/{domains.Count}");
+                //await 
             }
+            return SemrushDomains;
         }
 
         public async static Task<SemrushDomain> StartScraping(string domainName)
@@ -47,7 +50,8 @@ namespace Domains_Scraper.Services
             var followVsNotFollowLinksAndBacklinkType = await GetfollowVsNotFollowLinksAndBacklinkType(domainName);
             domain.FollowLinksVsNotFollowLink = followVsNotFollowLinksAndBacklinkType.fVsNotF;
             domain.BacklinkType = followVsNotFollowLinksAndBacklinkType.backlinkType;
-
+            //var json = JsonConvert.SerializeObject(domain, Formatting.Indented);
+            //File.WriteAllText("SemrushDomains.txt", json);
             return domain;
 
         }
@@ -118,8 +122,7 @@ namespace Domains_Scraper.Services
                     var keyWords = (int)result.SelectToken("organicPositions");
                     organicTrafficAndKeywordsByCountries.Add(new OrganicTrafficAndKeywordsByCountry { Country = country, OranicTraficValue = traffic, KeyWordsValue = keyWords });
                 }
-                var xxxx = organicTrafficAndKeywordsByCountries;
-                organicTrafficAndKeywordsByCountries = organicTrafficAndKeywordsByCountries.OrderByDescending(x => x.OranicTraficValue).ToList();
+                organicTrafficAndKeywordsByCountries = organicTrafficAndKeywordsByCountries.OrderBy(x => x.OranicTraficValue).ToList();
                 return organicTrafficAndKeywordsByCountries;
             }
             catch (Exception ex)
@@ -169,17 +172,17 @@ namespace Domains_Scraper.Services
                     dt = dt.Insert(4, "/");
                     dt = dt.Insert(7, "/");
                     var date = DateTime.Parse(dt);
-                    var organicTrafficValue = (int)result.SelectToken("organicTraffic");
+                    var organicTrafficValue = (long)result.SelectToken("organicTraffic");
                     var positions = result.SelectToken("organicPositionsTrend");
-                    var topThree = (int)positions[0];
-                    var fourToTen = (int)positions[1];
-                    var elevenToTwenty = (int)positions[2];
-                    var twentyOneToFifty = (int)positions[3] + (int)positions[4] + (int)positions[5];
-                    var fiftyOneToOneHundred = (int)positions[6] + (int)positions[7] + (int)positions[8] + (int)positions[9] + (int)positions[10];
+                    var topThree = (long)positions[0];
+                    var fourToTen = (long)positions[1];
+                    var elevenToTwenty = (long)positions[2];
+                    var twentyOneToFifty = (long)positions[3] + (long)positions[4] + (long)positions[5];
+                    var fiftyOneToOneHundred = (long)positions[6] + (long)positions[7] + (long)positions[8] + (long)positions[9] + (long)positions[10];
                     var total = topThree + fourToTen + elevenToTwenty + twentyOneToFifty + fiftyOneToOneHundred;
                     organicPositionsDistribution.Add(new OrganicChartData { Date = date, TopThree = topThree, FourToTen = fourToTen, ElevenToTwenty = elevenToTwenty, FiftyOneToOneHundred = fiftyOneToOneHundred, Total = total });
                 }
-                organicPositionsDistribution = organicPositionsDistribution.OrderByDescending(x => x.Date).ToList();
+                organicPositionsDistribution = organicPositionsDistribution.OrderBy(x => x.Date).ToList();
                 return organicPositionsDistribution;
             }
             catch (Exception ex)
@@ -269,6 +272,7 @@ namespace Domains_Scraper.Services
                     var total = topThree + fourToTen + elevenToTwenty + twentyOneToFifty + fiftyOneToOneHundred;
                     organicKeyWordsChartData.Add(new OrganicChartData { Date = date, TopThree = topThree, FourToTen = fourToTen, ElevenToTwenty = elevenToTwenty, TwentyOneToFifty = twentyOneToFifty, FiftyOneToOneHundred = fiftyOneToOneHundred, Total = total });
                 }
+                organicKeyWordsChartData.OrderBy(x => x.Date).ToList();
                 return organicKeyWordsChartData;
             }
             catch (Exception ex)
@@ -303,6 +307,7 @@ namespace Domains_Scraper.Services
                         var g = (string)result.SelectToken("organicTraffic");
                     }
                 }
+                organicTrafficChartDatas.OrderBy(x => x.Date).ToList();
                 return organicTrafficChartDatas;
             }
             catch (Exception ex)
@@ -312,7 +317,7 @@ namespace Domains_Scraper.Services
             }
         }
 
-        public async static Task<(int authorityScore, int backlinks)> GetAuthrityAndBacklinksScore(string domainName)
+        public async static Task<(long authorityScore, long backlinks)> GetAuthrityAndBacklinksScore(string domainName)
         {
             try
             {
@@ -330,8 +335,8 @@ namespace Domains_Scraper.Services
                 var url = "https://www.semrush.com/dpa/rpc";
                 var json = await HttpCaller.PostJson(url, jsonFormData);
                 var obj = JObject.Parse(json);
-                var authorityScore = (int)obj.SelectToken("..authorityScore");
-                var backlinks = (int)obj.SelectToken("..backlinks");
+                var authorityScore = (long)obj.SelectToken("..authorityScore");
+                var backlinks = (long)obj.SelectToken("..backlinks");
                 return (authorityScore, backlinks);
             }
             catch (Exception e)

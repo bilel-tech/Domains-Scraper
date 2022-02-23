@@ -3,6 +3,7 @@ using System;
 using Domains_Scraper.Entity_Framework_folder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Domains_Scraper.Migrations
 {
     [DbContext(typeof(LibraryContext))]
-    partial class LibraryContextModelSnapshot : ModelSnapshot
+    [Migration("20220210105114_ChangeReference")]
+    partial class ChangeReference
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,6 +53,9 @@ namespace Domains_Scraper.Migrations
                     b.Property<long>("ImageLinks")
                         .HasColumnType("bigint");
 
+                    b.Property<int?>("SemrushDomainId")
+                        .HasColumnType("int");
+
                     b.Property<long>("TextLinks")
                         .HasColumnType("bigint");
 
@@ -70,6 +75,9 @@ namespace Domains_Scraper.Migrations
 
                     b.Property<long>("NotFollowLinks")
                         .HasColumnType("bigint");
+
+                    b.Property<int?>("SemrushDomainId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -188,13 +196,13 @@ namespace Domains_Scraper.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int?>("AllTimeOrganicDataId")
+                    b.Property<int>("AllTimeOrganicDataId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int?>("OneYearOrganicDataId")
+                    b.Property<int>("OneYearOrganicDataId")
                         .HasColumnType("int");
 
                     b.Property<long>("OrganicTrafficValue")
@@ -221,19 +229,19 @@ namespace Domains_Scraper.Migrations
                     b.Property<long>("AuthorityScore")
                         .HasColumnType("bigint");
 
-                    b.Property<int?>("BacklinkTypeId")
+                    b.Property<int>("BacklinkTypeId")
                         .HasColumnType("int");
 
                     b.Property<long>("Backlinks")
                         .HasColumnType("bigint");
 
-                    b.Property<int?>("FollowLinksVsNotFollowLinkId")
+                    b.Property<int>("FollowLinksVsNotFollowLinkId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .HasColumnType("longtext");
 
-                    b.Property<int?>("OrganicDataId")
+                    b.Property<int>("OrganicDataId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -297,11 +305,15 @@ namespace Domains_Scraper.Migrations
                 {
                     b.HasOne("Domains_Scraper.Models.AllTimeOrganicData", "AllTimeOrganicData")
                         .WithMany("AllTimeOrganicTrafficChartData")
-                        .HasForeignKey("AllTimeOrganicDataId");
+                        .HasForeignKey("AllTimeOrganicDataId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Domains_Scraper.Models.OneYearOrganicData", "OneYearOrganicData")
                         .WithMany("OneYearOrganicTrafficChartData")
-                        .HasForeignKey("OneYearOrganicDataId");
+                        .HasForeignKey("OneYearOrganicDataId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("AllTimeOrganicData");
 
@@ -312,15 +324,21 @@ namespace Domains_Scraper.Migrations
                 {
                     b.HasOne("Domains_Scraper.Models.BacklinkType", "BacklinkType")
                         .WithMany()
-                        .HasForeignKey("BacklinkTypeId");
+                        .HasForeignKey("BacklinkTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Domains_Scraper.Models.FollowLinksVsNoFollowLink", "FollowLinksVsNotFollowLink")
                         .WithMany()
-                        .HasForeignKey("FollowLinksVsNotFollowLinkId");
+                        .HasForeignKey("FollowLinksVsNotFollowLinkId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Domains_Scraper.Models.OrganicData", "OrganicData")
                         .WithMany()
-                        .HasForeignKey("OrganicDataId");
+                        .HasForeignKey("OrganicDataId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("BacklinkType");
 

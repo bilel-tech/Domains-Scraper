@@ -3,6 +3,7 @@ using System;
 using Domains_Scraper.Entity_Framework_folder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Domains_Scraper.Migrations
 {
     [DbContext(typeof(LibraryContext))]
-    partial class LibraryContextModelSnapshot : ModelSnapshot
+    [Migration("20220213141326_ChangeNullableId")]
+    partial class ChangeNullableId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,6 +53,9 @@ namespace Domains_Scraper.Migrations
                     b.Property<long>("ImageLinks")
                         .HasColumnType("bigint");
 
+                    b.Property<int?>("SemrushDomainId")
+                        .HasColumnType("int");
+
                     b.Property<long>("TextLinks")
                         .HasColumnType("bigint");
 
@@ -70,6 +75,9 @@ namespace Domains_Scraper.Migrations
 
                     b.Property<long>("NotFollowLinks")
                         .HasColumnType("bigint");
+
+                    b.Property<int?>("SemrushDomainId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

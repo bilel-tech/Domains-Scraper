@@ -164,7 +164,7 @@ namespace Domains_Scraper.Models
                     }
                     else if (propertyInfo.PropertyType.IsEnum)
                     {
-                        sql.Append((int)propertyInfo.GetValue(model, null)).Append(",");
+                        sql.Append((long)propertyInfo.GetValue(model, null)).Append(",");
                     }
                     else
                     {

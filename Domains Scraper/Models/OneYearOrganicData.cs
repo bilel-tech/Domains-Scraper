@@ -9,7 +9,8 @@ namespace Domains_Scraper.Models
     public class OneYearOrganicData
     {
         public int Id { get; set; }
-        public int OrganicDataId { get; set; }
+        public int? OrganicDataId { get; set; }
+        public OrganicData OrganicData { get; set; }
         public List<OrganicTrafficChartData> OneYearOrganicTrafficChartData { get; set; } = new List<OrganicTrafficChartData>();
         public List<OrganicChartData> OneYearOrganicKeyWordsChartData { get; set; } = new List<OrganicChartData>();
     }
