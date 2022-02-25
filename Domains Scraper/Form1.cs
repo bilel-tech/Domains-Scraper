@@ -3,6 +3,7 @@ using Domains_Scraper.Models;
 using Domains_Scraper.Services;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Domains_Scraper
 {
@@ -17,11 +18,11 @@ namespace Domains_Scraper
         private List<OrganicTrafficChartData> _organicTrafficChartDatas = new List<OrganicTrafficChartData>();
         private List<OrganicChartData> _OrganicChartDatas = new List<OrganicChartData>();
         private List<OrganicTrafficAndKeywordsByCountry> _OrganicTrafficAndKeywordsByCountry = new List<OrganicTrafficAndKeywordsByCountry>();
-        private int UpDown;
+        private int _delay;
         private async void Start_Click(object sender, EventArgs e)
         {
-            UpDown = (int)DelayUpDown.Value * 1000;
-            await AddParaMetersToSemRush();
+            _delay = (int)DelayUpDown.Value * 1000;
+           
             await Task.Run(MainWork);
             InsertData();
         }
@@ -179,9 +180,11 @@ namespace Domains_Scraper
         {
 
             //InsertData();
-            //return;
+            await AhrefService.LogIn();
+            await AhrefService.StartScraping("upwork.com");
+            return;
             var domains = await GetDomainsToScrapeFromDatbase();
-            var semrushTask = await SemrushServices.GetData(domains);
+            var semrushTask = await SemrushServices.GetData(domains, _delay);
             var json = JsonConvert.SerializeObject(semrushTask, Formatting.Indented);
             File.WriteAllText("SemrushDomains.txt", json);
             //await Task.WhenAll(semrushTask);
@@ -192,7 +195,7 @@ namespace Domains_Scraper
         private async Task<List<string>> GetDomainsToScrapeFromDatbase()
         {
             var domains = new List<string>();
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 1; i++)
             {
                 domains.Add("google.com");
             }
@@ -221,7 +224,6 @@ namespace Domains_Scraper
             //json = await HttpCaller.PostJson(urlAuthority, formDataAuthorityScore);
             //var obj = JObject.Parse(json);
             //var authorityScore = (string)obj.SelectToken("..authorityScore");
-
         }
     }
 }

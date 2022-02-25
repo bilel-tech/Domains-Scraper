@@ -17,7 +17,7 @@ namespace Domains_Scraper.Services
         public static List<string> _domains;
         public static HttpCaller HttpCaller = new HttpCaller();
         private static List<SemrushDomain> SemrushDomains = new List<SemrushDomain>();
-        public async static Task<List<SemrushDomain>> GetData(List<string> domains)
+        public async static Task<List<SemrushDomain>> GetData(List<string> domains, int delay)
         {
             Reporter.Log("Start scraping domains from semrush.com");
             //var tpl = new TransformBlock<string, SemrushDomain>(async x => await StartScraping(x).ConfigureAwait(false), new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = 1 });
@@ -34,7 +34,7 @@ namespace Domains_Scraper.Services
                     SemrushDomains.Add(domainSemRush);
                 }
                 Reporter.Progress(i + 1, domains.Count, $@"Domain Scraped from semrush.com {i + 1}/{domains.Count}");
-                //await 
+                await Task.Delay(delay);
             }
             return SemrushDomains;
         }
