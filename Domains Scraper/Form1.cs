@@ -4,6 +4,7 @@ using Domains_Scraper.Services;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 
 namespace Domains_Scraper
 {
@@ -21,8 +22,172 @@ namespace Domains_Scraper
         private int _delay;
         private async void Start_Click(object sender, EventArgs e)
         {
-            _delay = (int)DelayUpDown.Value * 1000;
-           
+            //title: New & lost referring domains
+            //monthly=> All time
+            //weekly=> One year
+            //monthly=> All time
+            //_delay = (int)DelayUpDown.Value * 1000;
+            var obj = JObject.Parse(File.ReadAllText("key words.txt"));
+            var startDate = (DateTime)obj.SelectToken("pointStartText");
+            var Date = DateTime.Now;
+            #region Referring Domains
+            //var refDomains = obj.SelectToken("$.all.Series.[?(@.name == 'Referring Domains')].data").ToList();
+            //for (int i = 0; i < refDomains.Count(); i++)
+            //{
+            //    Debug.WriteLine(startDate.ToString() + "\r\n" + "refDomains: " + refDomains[i] + "\r\n");
+            //    startDate = startDate.AddDays(1);
+            //}
+            //take from it one year and last 30 days datas
+            #endregion
+            startDate = (DateTime)obj.SelectToken("pointStartText");
+            #region Referring pages
+            //var refPages = obj.SelectToken("$.all.Series.[?(@.name == 'Total')].data").ToList();
+
+            //for (int i = 0; i < refPages.Count(); i++)
+            //{
+            //    Debug.WriteLine(startDate.ToString() + "\r\n" + "refPages: " + refPages[i] + "\r\n");
+            //    startDate = startDate.AddDays(1);
+            //}
+            //take from it one year and last 30 days datas
+            #endregion
+            startDate = (DateTime)obj.SelectToken("pointStartText");
+            #region Domain Rating
+            var DomainRatings = obj.SelectToken("$.all.Series.[?(@.name == 'DomainRating')].data").ToList();
+
+            for (int i = 0; i < DomainRatings.Count(); i++)
+            {
+                Debug.WriteLine(startDate.ToString() + "\r\n" + "refPages: " + DomainRatings[i] + "\r\n");
+                startDate = startDate.AddDays(1);
+            }
+            //take from it one year and last 30 days datas
+            #endregion
+            startDate = (DateTime)obj.SelectToken("pointStartText");
+            #region New & lost referring domains
+            #region last 30 days
+
+            //var refDomainsNewLast30Days = obj.SelectToken("$.all.Series.[?(@.name == 'Ref.Domains New')].data").ToList();
+
+            //var refDomainsLost30Days = obj.SelectToken("$.all.Series.[?(@.name == 'Ref.Domains Lost')].data").ToList();
+
+            //for (int i = refDomainsNewLast30Days.Count(); i-- > 0;)
+            //{
+            //    Debug.WriteLine(i + "" + "\r\n" + startDate.ToString() + "\r\n" + "refDomainsNew: " + refDomainsNewLast30Days[i] + "\r\n" + "refDomainsLost: " + refDomainsLost30Days[i] + "\r\n");
+            //    Date = startDate.AddDays(-1);
+            //}
+            #endregion
+            startDate = (DateTime)obj.SelectToken("pointStartText");
+            #region  All time
+            //var refDomainsNewLastAllTime = obj.SelectToken("$.monthly.Series.[?(@.name == 'Ref.Domains New')].data").ToList();
+            //var refDomainsLostAllTime = obj.SelectToken("$.monthly.Series.[?(@.name == 'Ref.Domains Lost')].data").ToList();
+
+            //for (int i = 0; i < refDomainsNewLastAllTime.Count(); i++)
+            //{
+            //    Debug.WriteLine(startDate.ToString() + "\r\n" + "refDomainsNew: " + refDomainsNewLastAllTime[i] + "\r\n" + "refDomainsLost: " + refDomainsLostAllTime[i] + "\r\n");
+            //    startDate = startDate.AddMonths(1);
+            //}
+            #endregion
+            startDate = (DateTime)obj.SelectToken("pointStartText");
+            #region  one year
+            //var refDomainsNewLastOneYear = obj.SelectToken("$.weekly.Series.[?(@.name == 'Ref.Domains New')].data").ToList();
+            //var refDomainsLostOneYear = obj.SelectToken("$.weekly.Series.[?(@.name == 'Ref.Domains Lost')].data").ToList();
+            //var dd = DateTime.Now;
+            //var date1 = dd;
+            //var date2 = date1.AddDays(6);
+
+            // for (int i = refDomainsNewLastOneYear.Count(); i-- > 0;)
+            //    {
+            //    Debug.WriteLine(date1.ToString()+ "     "+ date2.ToString() + "\r\n" + "  refDomainsNew: " + refDomainsNewLastOneYear[i] + "\r\n" + "  refDomainsLost: " + refDomainsLostOneYear[i] + "\r\n");
+            //    date1 = date1.AddDays(-7);
+            //    date2 = date2.AddDays(-7);
+            //}
+            #endregion
+            #endregion
+            startDate = (DateTime)obj.SelectToken("pointStartText");
+            #region New & lost backlinks
+            #region one year
+            //var newDoFollow = obj.SelectToken("$.weekly.Series.[?(@.name == 'NewDoFollow')].data").ToList();
+            //var lostDoFollow = obj.SelectToken("$.weekly.Series.[?(@.name == 'LostDoFollow')].data").ToList();
+            //var newNoFollow = obj.SelectToken("$.weekly.Series.[?(@.name == 'NewNoFollow')].data").ToList();
+            //var lostNoFollow = obj.SelectToken("$.weekly.Series.[?(@.name == 'LostNoFollow')].data").ToList();
+            //var newRedirect = obj.SelectToken("$.weekly.Series.[?(@.name == 'NewRedirect')].data").ToList();
+            //var lostRedirect = obj.SelectToken("$.weekly.Series.[?(@.name == 'LostRedirect')].data").ToList();
+            //var newOther = obj.SelectToken("$.weekly.Series.[?(@.name == 'NewOther')].data").ToList();
+            //var lostOther = obj.SelectToken("$.weekly.Series.[?(@.name == 'LostOther')].data").ToList();
+            //var dd = DateTime.Now;
+            //var date1 = dd;
+            //var date2 = date1.AddDays(6);
+            //for (int i = newDoFollow.Count(); i-- > 0;)
+            //{
+            //    var nDfl = (long)newDoFollow[i];
+            //    var lDfl = (long)lostDoFollow[i];
+            //    var nNfl = (long)newNoFollow[i];
+            //    var lNfl = (long)lostNoFollow[i];
+            //    var nRdct = (long)newRedirect[i];
+            //    var lRdct = (long)lostRedirect[i];
+            //    var nOther = (long)newOther[i];
+            //    var lOther = (long)lostOther[i];
+            //    var totalNew = nDfl + nNfl + nRdct + nOther;
+            //    var totalLost = lDfl + lNfl + lRdct + lOther;
+            //    Debug.WriteLine(date1.ToString() + " ==> " + date2.ToString() + "\r\n" + "Total: " + totalNew + "   " + totalLost + "\r\n" + "Other : " + nOther + "  " + lOther + "\r\n" + "Redirect : " + nRdct + "  " + lRdct + "\r\n" + "Nofollow : " + nNfl + "  " + lNfl + "\r\n" + "Dofollow : "+ nDfl + "  " + lDfl + "\r\n");
+            //    date1 = date1.AddDays(-7);
+            //    date2 = date2.AddDays(-7);
+            //}
+            #endregion
+            #region  All time
+            //var newDoFollow = obj.SelectToken("$.monthly.Series.[?(@.name == 'NewDoFollow')].data").ToList();
+            //var lostDoFollow = obj.SelectToken("$.monthly.Series.[?(@.name == 'LostDoFollow')].data").ToList();
+            //var newNoFollow = obj.SelectToken("$.monthly.Series.[?(@.name == 'NewNoFollow')].data").ToList();
+            //var lostNoFollow = obj.SelectToken("$.monthly.Series.[?(@.name == 'LostNoFollow')].data").ToList();
+            //var newRedirect = obj.SelectToken("$.monthly.Series.[?(@.name == 'NewRedirect')].data").ToList();
+            //var lostRedirect = obj.SelectToken("$.monthly.Series.[?(@.name == 'LostRedirect')].data").ToList();
+            //var newOther = obj.SelectToken("$.monthly.Series.[?(@.name == 'NewOther')].data").ToList();
+            //var lostOther = obj.SelectToken("$.monthly.Series.[?(@.name == 'LostOther')].data").ToList();
+
+            //for (int i = 0; i < newDoFollow.Count(); i++)
+            //{
+            //    var nDfl = (long)newDoFollow[i];
+            //    var lDfl = (long)lostDoFollow[i];
+            //    var nNfl = (long)newNoFollow[i];
+            //    var lNfl = (long)lostNoFollow[i];
+            //    var nRdct = (long)newRedirect[i];
+            //    var lRdct = (long)lostRedirect[i];
+            //    var nOther = (long)newOther[i];
+            //    var lOther = (long)lostOther[i];
+            //    var totalNew = nDfl + nNfl + nRdct + nOther;
+            //    var totalLost = lDfl + lNfl + lRdct + lOther;
+            //    Debug.WriteLine(startDate.ToString() + "\r\n" + "Total: " + totalNew + "   " + totalLost + "\r\n" + "Other : " + nOther + "  " + lOther + "\r\n" + "Redirect : " + nRdct + "  " + lRdct + "\r\n" + "Nofollow : " + nNfl + "  " + lNfl + "\r\n" + "Dofollow : " + nDfl + "  " + lDfl + "\r\n");
+            //    startDate = startDate.AddMonths(1);
+            //}
+            #endregion
+            startDate = (DateTime)obj.SelectToken("pointStartText");
+            #region last 30 days
+
+            //var newDoFollow = obj.SelectToken("$.all.Series.[?(@.name == 'NewDoFollow')].data").ToList();
+            //var lostDoFollow = obj.SelectToken("$.all.Series.[?(@.name == 'LostDoFollow')].data").ToList();
+            //var newNoFollow = obj.SelectToken("$.all.Series.[?(@.name == 'NewNoFollow')].data").ToList();
+            //var lostNoFollow = obj.SelectToken("$.all.Series.[?(@.name == 'LostNoFollow')].data").ToList();
+            //var newRedirect = obj.SelectToken("$.all.Series.[?(@.name == 'NewRedirect')].data").ToList();
+            //var lostRedirect = obj.SelectToken("$.all.Series.[?(@.name == 'LostRedirect')].data").ToList();
+            //var newOther = obj.SelectToken("$.all.Series.[?(@.name == 'NewOther')].data").ToList();
+            //var lostOther = obj.SelectToken("$.all.Series.[?(@.name == 'LostOther')].data").ToList();
+            //var date= DateTime.Now;
+            //for (int i = newDoFollow.Count(); i-- > 0;)
+            //{
+            //    var nDfl = (long)newDoFollow[i];
+            //    var lDfl = (long)lostDoFollow[i];
+            //    var nNfl = (long)newNoFollow[i];
+            //    var lNfl = (long)lostNoFollow[i];
+            //    var nRdct = (long)newRedirect[i];
+            //    var lRdct = (long)lostRedirect[i];
+            //    var nOther = (long)newOther[i];
+            //    var lOther = (long)lostOther[i];
+            //    var totalNew = nDfl + nNfl + nRdct + nOther;
+            //    var totalLost = lDfl + lNfl + lRdct + lOther;
+            //    Debug.WriteLine(date.ToString() + "\r\n" + "Total: " + totalNew + "   " + totalLost + "\r\n" + "Other : " + nOther + "  " + lOther + "\r\n" + "Redirect : " + nRdct + "  " + lRdct + "\r\n" + "Nofollow : " + nNfl + "  " + lNfl + "\r\n" + "Dofollow : " + nDfl + "  " + lDfl + "\r\n");
+            //    date = date.AddDays(-1);
+            //}
+            #endregion
+            #endregion
             await Task.Run(MainWork);
             InsertData();
         }

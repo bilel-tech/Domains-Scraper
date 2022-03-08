@@ -52,17 +52,20 @@ namespace Domains_Scraper.Services
             var ahrefDomain = new AhrefDomain();
             var csHashAndUr = await GetCsHashAndUr(domainName);
             _csHash = csHashAndUr.csHash;
-            //ahrefDomain.Ur = csHashAndUr.Ur;
-            //ahrefDomain.Dr = await GetDr();
-            //var backLinks = await GetBacklinksData(domainName);
-            //ahrefDomain.BacklinksType = backLinks.backlinksType;
-            //ahrefDomain.TotalBacklinks = backLinks.totalBacklinks;
-            //var referringDomains = await GetReferringDomainsData(domainName);
-            //ahrefDomain.ReferringDomainsTypes = referringDomains.refDomains;
-            //ahrefDomain.TotalReferringDomains = referringDomains.totalReferringDomains;
-            //ahrefDomain.OrganicCharts = await GetOrganicDataData(domainName);
-            //ahrefDomain.OrganicTraffic = ahrefDomain.OrganicCharts.Last().OrganicTrafficTotal;
-            //ahrefDomain.OrganicKeyWords = ahrefDomain.OrganicCharts.Last().OrganicKeyWordsTotal;
+            ahrefDomain.Ur = csHashAndUr.Ur;
+            ahrefDomain.Dr = await GetDr();
+            var backLinks = await GetBacklinksData(domainName);
+            ahrefDomain.BacklinksType = backLinks.backlinksType;
+            ahrefDomain.TotalBacklinks = backLinks.totalBacklinks;
+            var referringDomains = await GetReferringDomainsData(domainName);
+            ahrefDomain.ReferringPages= referringDomains.referringPages;
+            ahrefDomain.ReferringIPs = referringDomains.referringIPs;
+            ahrefDomain.ReferringSubnets = referringDomains.referringSubnets;
+            ahrefDomain.ReferringDomainsTypes = referringDomains.refDomains;
+            ahrefDomain.TotalReferringDomains = referringDomains.totalReferringDomains;
+            ahrefDomain.OrganicCharts = await GetOrganicDataData(domainName);
+            ahrefDomain.OrganicTraffic = ahrefDomain.OrganicCharts.Last().OrganicTrafficTotal;
+            ahrefDomain.OrganicKeyWords = ahrefDomain.OrganicCharts.Last().OrganicKeyWordsTotal;
             return ahrefDomain;
         }
 
@@ -110,11 +113,14 @@ namespace Domains_Scraper.Services
             }
             return organicCharts;
         }
-        private static async Task<(List<BacklinksType> refDomains, long totalReferringDomains)> GetReferringDomainsData(string domainName)
+        private static async Task<(List<BacklinksType> refDomains, long totalReferringDomains, long referringPages, long referringIPs, long referringSubnets)> GetReferringDomainsData(string domainName)
         {
             var referringDomains = new List<BacklinksType>();
             var json = await _httpCaller.GetHtmlAhref("https://app.ahrefs.com/site-explorer/ajax/overview/referring-domains-stats/" + _csHash);
             var obj = JObject.Parse(json);
+            var referringPages = (long)obj.SelectToken("referring_pages");
+            var referringIPs = (long)obj.SelectToken("refips");
+            var referringSubnets = (long)obj.SelectToken("refclass_c");
             var totalReferringDomains = (long)obj.SelectToken("total_referring_domains");
             var refD = new BacklinksType();
             refD.Title = "Dofollow";
@@ -156,7 +162,7 @@ namespace Domains_Scraper.Services
             refD.Value = (long)obj.SelectToken("..referring_domains_org");
             refD.Percentage = (double)obj.SelectToken("..referring_domains_org");
             referringDomains.Add(refD);
-            return (referringDomains, totalReferringDomains);
+            return (referringDomains, totalReferringDomains,referringPages, referringIPs, referringSubnets);
         }
         private static async Task GeCshToken()
         {

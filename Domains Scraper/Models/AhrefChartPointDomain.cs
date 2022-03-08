@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace Domains_Scraper.Models
 {
-    public class OrganicAhrefCharts
+    public class AhrefChartPointDomain
     {
-       
+        public DateTime Date { get; set; }
+        public long Value { get; set; }
     }
 }
