@@ -22,14 +22,16 @@ namespace Domains_Scraper
         private int _delay;
         private async void Start_Click(object sender, EventArgs e)
         {
+            //await AhrefService.GetCharts();
             //title: New & lost referring domains
             //monthly=> All time
             //weekly=> One year
             //monthly=> All time
             //_delay = (int)DelayUpDown.Value * 1000;
-            var obj = JObject.Parse(File.ReadAllText("key words.txt"));
-            var startDate = (DateTime)obj.SelectToken("pointStartText");
-            var Date = DateTime.Now;
+            var obj = JObject.Parse(File.ReadAllText("Charts.txt"));
+            #region Charts draft work
+            //var startDate = (DateTime)obj.SelectToken("pointStartText");
+            //var Date = DateTime.Now;
             #region Referring Domains
             //var refDomains = obj.SelectToken("$.all.Series.[?(@.name == 'Referring Domains')].data").ToList();
             //for (int i = 0; i < refDomains.Count(); i++)
@@ -39,7 +41,7 @@ namespace Domains_Scraper
             //}
             //take from it one year and last 30 days datas
             #endregion
-            startDate = (DateTime)obj.SelectToken("pointStartText");
+            //startDate = (DateTime)obj.SelectToken("pointStartText");
             #region Referring pages
             //var refPages = obj.SelectToken("$.all.Series.[?(@.name == 'Total')].data").ToList();
 
@@ -50,18 +52,18 @@ namespace Domains_Scraper
             //}
             //take from it one year and last 30 days datas
             #endregion
-            startDate = (DateTime)obj.SelectToken("pointStartText");
+            //startDate = (DateTime)obj.SelectToken("pointStartText");
             #region Domain Rating
-            var DomainRatings = obj.SelectToken("$.all.Series.[?(@.name == 'DomainRating')].data").ToList();
+            //var DomainRatings = obj.SelectToken("$.all.Series.[?(@.name == 'DomainRating')].data").ToList();
 
-            for (int i = 0; i < DomainRatings.Count(); i++)
-            {
-                Debug.WriteLine(startDate.ToString() + "\r\n" + "refPages: " + DomainRatings[i] + "\r\n");
-                startDate = startDate.AddDays(1);
-            }
+            //for (int i = 0; i < DomainRatings.Count(); i++)
+            //{
+            //    Debug.WriteLine(startDate.ToString() + "\r\n" + "refPages: " + DomainRatings[i] + "\r\n");
+            //    startDate = startDate.AddDays(1);
+            //}
             //take from it one year and last 30 days datas
             #endregion
-            startDate = (DateTime)obj.SelectToken("pointStartText");
+            //startDate = (DateTime)obj.SelectToken("pointStartText");
             #region New & lost referring domains
             #region last 30 days
 
@@ -75,7 +77,7 @@ namespace Domains_Scraper
             //    Date = startDate.AddDays(-1);
             //}
             #endregion
-            startDate = (DateTime)obj.SelectToken("pointStartText");
+            //startDate = (DateTime)obj.SelectToken("pointStartText");
             #region  All time
             //var refDomainsNewLastAllTime = obj.SelectToken("$.monthly.Series.[?(@.name == 'Ref.Domains New')].data").ToList();
             //var refDomainsLostAllTime = obj.SelectToken("$.monthly.Series.[?(@.name == 'Ref.Domains Lost')].data").ToList();
@@ -86,7 +88,7 @@ namespace Domains_Scraper
             //    startDate = startDate.AddMonths(1);
             //}
             #endregion
-            startDate = (DateTime)obj.SelectToken("pointStartText");
+            //startDate = (DateTime)obj.SelectToken("pointStartText");
             #region  one year
             //var refDomainsNewLastOneYear = obj.SelectToken("$.weekly.Series.[?(@.name == 'Ref.Domains New')].data").ToList();
             //var refDomainsLostOneYear = obj.SelectToken("$.weekly.Series.[?(@.name == 'Ref.Domains Lost')].data").ToList();
@@ -102,7 +104,7 @@ namespace Domains_Scraper
             //}
             #endregion
             #endregion
-            startDate = (DateTime)obj.SelectToken("pointStartText");
+            //startDate = (DateTime)obj.SelectToken("pointStartText");
             #region New & lost backlinks
             #region one year
             //var newDoFollow = obj.SelectToken("$.weekly.Series.[?(@.name == 'NewDoFollow')].data").ToList();
@@ -159,7 +161,7 @@ namespace Domains_Scraper
             //    startDate = startDate.AddMonths(1);
             //}
             #endregion
-            startDate = (DateTime)obj.SelectToken("pointStartText");
+            //startDate = (DateTime)obj.SelectToken("pointStartText");
             #region last 30 days
 
             //var newDoFollow = obj.SelectToken("$.all.Series.[?(@.name == 'NewDoFollow')].data").ToList();
@@ -187,6 +189,43 @@ namespace Domains_Scraper
             //    date = date.AddDays(-1);
             //}
             #endregion
+            #endregion
+            #endregion
+
+            #region tld draft work
+            //obj = JObject.Parse(File.ReadAllText("CTLDs distribution.txt"));
+            //var sum = (double)obj.SelectToken("AllSum");
+            //var dic = new Dictionary<string, string>();
+            //var tlds = obj.SelectToken("..Series..data2").ToList();
+            //var Ctlds = obj.SelectToken("..Series..data").ToList();
+            //var tldsDistribution = new List<TldsDistribution>();
+            //var tldsDistributionByCountry = new List<TldsDistribution>();
+            //foreach (var tld in tlds)
+            //{
+            //    var cName = (string)tld.SelectToken("CName");
+            //    var symbol = ((string)tld.SelectToken("ISO2")).ToLower();
+            //    dic.Add(symbol, cName);
+            //}
+            //foreach (var Ctld in Ctlds)
+            //{
+            //    var name = (string)Ctld.SelectToken("name");
+            //    if (dic.ContainsKey(name))
+            //    {
+            //        var countryName = dic[name];
+            //        var value = (int)Ctld.SelectToken("y");
+            //        double percent = (value * 100) / sum;
+            //        percent = Math.Round(percent, 2);
+            //        tldsDistributionByCountry.Add(new TldsDistribution { Name = countryName, Value = value, Percent = percent });
+            //        tldsDistribution.Add(new TldsDistribution { Name = name, Value = value, Percent = percent });
+            //    }
+            //    else
+            //    {
+            //        var value = (int)Ctld.SelectToken("y");
+            //        double percent = (value * 100) / sum;
+            //        percent = Math.Round(percent, 2);
+            //        tldsDistribution.Add(new TldsDistribution { Name = name, Value = value, Percent = percent });
+            //    }
+            //} 
             #endregion
             await Task.Run(MainWork);
             InsertData();
@@ -346,7 +385,7 @@ namespace Domains_Scraper
 
             //InsertData();
             await AhrefService.LogIn();
-            await AhrefService.StartScraping("upwork.com");
+            await AhrefService.StartScraping("alibaba.com");
             return;
             var domains = await GetDomainsToScrapeFromDatbase();
             var semrushTask = await SemrushServices.GetData(domains, _delay);

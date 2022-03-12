@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Domains_Scraper.Models
 {
-    public class AhrefChartPointDomain
+    public class TldsDistribution
     {
-        public int Id { get; set; }
-        public DateTime Date { get; set; }
-        public long? Value { get; set; }
+        public string Name { get; set; }
+        public long Value { get; set; }
+        public double Percent { get; set; }
     }
 }

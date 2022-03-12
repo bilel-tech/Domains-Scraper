@@ -8,12 +8,14 @@ namespace Domains_Scraper.Models
 {
     public class AhrefChartPointNewAndLostBacklinksDomain
     {
+        public int Id { get; set; }
+        public int? AhrefNewAndLostChartsId { get; set; }
         public DateTime Date1 { get; set; }
-        public DateTime Date2 { get; set; }
-        public long NewDoFolloow { get; set; }
-        public long LostDoFolloow { get; set; }
-        public long NewNoFolloow { get; set; }
-        public long LostNoFolloow { get; set; }
+        public DateTime? Date2 { get; set; }
+        public long NewDoFollow { get; set; }
+        public long LostDoFollow { get; set; }
+        public long NewNoFollow { get; set; }
+        public long LostNoFollow { get; set; }
         public long NewRedirect { get; set; }
         public long LostRedirect { get; set; }
         public long NewOther { get; set; }
