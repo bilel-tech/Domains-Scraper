@@ -13,22 +13,103 @@ namespace Domains_Scraper
         public Form1()
         {
             InitializeComponent();
+            Reporter.OnLog += OnLog;
+            Reporter.OnError += OnError;
+            Reporter.OnProgress += OnProgress;
         }
         private LibraryContext _context = new LibraryContext();
+        private List<string> _domainsToScrape = new List<string>();
         private List<SemrushDomain> _semrushLodedDoamins = new List<SemrushDomain>();
+        private List<AhrefDomain> _ahrefLodedDoamins = new List<AhrefDomain>();
         private List<OrganicTrafficChartData> _organicTrafficChartDatas = new List<OrganicTrafficChartData>();
         private List<OrganicChartData> _OrganicChartDatas = new List<OrganicChartData>();
         private List<OrganicTrafficAndKeywordsByCountry> _OrganicTrafficAndKeywordsByCountry = new List<OrganicTrafficAndKeywordsByCountry>();
         private int _delay;
+        private void OnProgress(object sender, (int nbr, int total, string message) e)
+        {
+            Display($"{e.message} {e.nbr} / {e.total}");
+            SetProgress(e.nbr * 100 / e.total);
+        }
+
+        private void OnError(object sender, string e)
+        {
+            ErrorLog(e);
+        }
+
+        private void OnLog(object sender, string e)
+        {
+            Display(e);
+            NormalLog(e);
+        }
+        public void NormalLog(string s)
+        {
+            WriteToLog(s, Color.Black);
+        }
+        public void ErrorLog(string s)
+        {
+            WriteToLog(s, Color.Red);
+        }
+        public void SuccessLog(string s)
+        {
+            WriteToLog(s, Color.Green);
+        }
+        public void CommandLog(string s)
+        {
+            WriteToLog(s, Color.Blue);
+        }
+
+        public delegate void SetProgressD(int x);
+        public void SetProgress(int x)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new SetProgressD(SetProgress), x);
+                return;
+            }
+            if ((x <= 100))
+            {
+                ProgressB.Value = x;
+            }
+        }
+        public delegate void DisplayD(string s);
+        public void Display(string s)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new DisplayD(Display), s);
+                return;
+            }
+            displayT.Text = s;
+        }
+        public delegate void WriteToLogD(string s, Color c);
+        public void WriteToLog(string s, Color c)
+        {
+            try
+            {
+                if (InvokeRequired)
+                {
+                    Invoke(new WriteToLogD(WriteToLog), s, c);
+                    return;
+                }
+
+                if (DebugT.Lines.Length > 5000)
+                {
+                    DebugT.Text = "";
+                }
+                DebugT.SelectionStart = DebugT.Text.Length;
+                DebugT.SelectionColor = c;
+                DebugT.AppendText(DateTime.Now.ToString(Utility.SimpleDateFormat) + " : " + s + Environment.NewLine);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
         private async void Start_Click(object sender, EventArgs e)
         {
-            //await AhrefService.GetCharts();
-            //title: New & lost referring domains
-            //monthly=> All time
-            //weekly=> One year
-            //monthly=> All time
-            //_delay = (int)DelayUpDown.Value * 1000;
-            var obj = JObject.Parse(File.ReadAllText("Charts.txt"));
+            _delay = (int)DelayUpDown.Value;
+            //var obj = JObject.Parse(File.ReadAllText("Charts.txt"));
             #region Charts draft work
             //var startDate = (DateTime)obj.SelectToken("pointStartText");
             //var Date = DateTime.Now;
@@ -228,7 +309,7 @@ namespace Domains_Scraper
             //} 
             #endregion
             await Task.Run(MainWork);
-            InsertData();
+            //InsertData();
         }
         private async void InsertData()
         {
@@ -236,7 +317,7 @@ namespace Domains_Scraper
             {
                 var domains = JsonConvert.DeserializeObject<List<SemrushDomain>>(File.ReadAllText("SemrushDomains.txt"));
                 _semrushLodedDoamins = _context.SemrushDomain.Include(x => x.OrganicData).Include(x => x.OrganicData.AllTimeOrganicData).Include(x => x.OrganicData.OneYearOrganicData).Include(x => x.BacklinkType).Include(x => x.FollowLinksVsNotFollowLink).ToList();
-
+                return;
                 foreach (var domain in domains)
                 {
                     await SaveData(domain);
@@ -382,21 +463,37 @@ namespace Domains_Scraper
 
         private async Task MainWork()
         {
-
+            //await AhrefService.LogIn();
+            //await AhrefService.GetOrganicDataData("alibaba.com");
+            var domains = GetDomainsToScrapeFromDatbase();
+            var ahrefDoaminsTask = ScrapeAhrefDomains();
+            await Task.WhenAll(ahrefDoaminsTask);
+            //var sumrushTask = ScrapeSumresh();
             //InsertData();
-            await AhrefService.LogIn();
-            await AhrefService.StartScraping("alibaba.com");
-            return;
-            var domains = await GetDomainsToScrapeFromDatbase();
-            var semrushTask = await SemrushServices.GetData(domains, _delay);
-            var json = JsonConvert.SerializeObject(semrushTask, Formatting.Indented);
-            File.WriteAllText("SemrushDomains.txt", json);
-            //await Task.WhenAll(semrushTask);
+
+
         }
 
+        private async Task ScrapeAhrefDomains()
+        {
+            //var domains = new List<string> { /*"upwork.com", "alibaba.com", "freelancer.com",*/ "amazon.com" };
+            var domains = new List<string>();
+            for (int i = 0; i < 1000; i++)
+            {
+                domains.Add("upwork.com");
+            }
+            var semrushDoamins = await AhrefService.GetData(domains, _delay);
+        }
 
+        private async Task ScrapeSumresh()
+        {
 
-        private async Task<List<string>> GetDomainsToScrapeFromDatbase()
+            var semrushDoamins = await SemrushServices.GetData(_domainsToScrape, _delay);
+            var json = JsonConvert.SerializeObject(semrushDoamins, Formatting.Indented);
+            //File.WriteAllText("SemrushDomains.txt", json);
+        }
+
+        private List<string> GetDomainsToScrapeFromDatbase()
         {
             var domains = new List<string>();
             for (int i = 0; i < 1; i++)

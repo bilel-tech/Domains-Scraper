@@ -30,45 +30,55 @@ namespace Domains_Scraper.Services
             await GeCshToken();
 
         }
-        public static async Task GetData(List<string> domains, int delay)
+        public static async Task<List<AhrefDomain>> GetData(List<string> domains, int delay)
         {
             await LogIn();
             var ahrefDomains = new List<AhrefDomain>();
             for (int i = 0; i < domains.Count; i++)
             {
-                var ahrefDomain = await StartScraping(domains[i]);
-                if (ahrefDomain != null)
+                try
                 {
-                    ahrefDomains.Add(ahrefDomain);
+                    var ahrefDomain = await StartScraping(domains[i]);
+                    if (ahrefDomain != null)
+                    {
+                        ahrefDomains.Add(ahrefDomain);
+                    }
+                    Reporter.Progress(i + 1, domains.Count, $@"Domain Scraped from app.ahrefs.com {i + 1}/{domains.Count}");
+                    await Task.Delay(delay);
                 }
-                Reporter.Progress(i + 1, domains.Count, $@"Domain Scraped from app.ahrefs.com {i + 1}/{domains.Count}");
-                await Task.Delay(delay);
+                catch (Exception ex)
+                {
+
+                    //
+                }
             }
+            return ahrefDomains;
         }
 
         public static async Task<AhrefDomain> StartScraping(string domainName)
         {
 
             var ahrefDomain = new AhrefDomain();
+            ahrefDomain.Name=domainName;
             var csHashAndUr = await GetCsHashAndUr(domainName);
             _csHash = csHashAndUr.csHash;
-            //ahrefDomain.Ur = csHashAndUr.Ur;
-            //ahrefDomain.Dr = await GetDr();
-            //var backLinks = await GetBacklinksData(domainName);
-            //ahrefDomain.BacklinksType = backLinks.backlinksType;
-            //ahrefDomain.TotalBacklinks = backLinks.totalBacklinks;
-            //var referringDomains = await GetReferringDomainsData(domainName);
-            //ahrefDomain.ReferringPages = referringDomains.referringPages;
-            //ahrefDomain.ReferringIPs = referringDomains.referringIPs;
-            //ahrefDomain.ReferringSubnets = referringDomains.referringSubnets;
-            //ahrefDomain.ReferringDomainsTypes = referringDomains.refDomains;
-            //ahrefDomain.TotalReferringDomains = referringDomains.totalReferringDomains;
+            ahrefDomain.Ur = csHashAndUr.Ur;
+            ahrefDomain.Dr = await GetDr();
+            var backLinks = await GetBacklinksData(domainName);
+            ahrefDomain.BacklinksType = backLinks.backlinksType;
+            ahrefDomain.TotalBacklinks = backLinks.totalBacklinks;
+            var referringDomains = await GetReferringDomainsData(domainName);
+            ahrefDomain.ReferringPages = referringDomains.referringPages;
+            ahrefDomain.ReferringIPs = referringDomains.referringIPs;
+            ahrefDomain.ReferringSubnets = referringDomains.referringSubnets;
+            ahrefDomain.ReferringDomainsTypes = referringDomains.refDomains;
+            ahrefDomain.TotalReferringDomains = referringDomains.totalReferringDomains;
             //ahrefDomain.OrganicCharts = await GetOrganicDataData(domainName);
             //ahrefDomain.OrganicTraffic = ahrefDomain.OrganicCharts.Last().OrganicTrafficTotal;
             //ahrefDomain.OrganicKeyWords = ahrefDomain.OrganicCharts.Last().OrganicKeyWordsTotal;
-            //var charts = await GetCharts();
-            //ahrefDomain.AhrefSimpleCharts = charts.ahrefSimpleCharts;
-            //ahrefDomain.AhrefNewAndLostCharts = charts.ahrefNewAndLostCharts;
+            var charts = await GetCharts();
+            ahrefDomain.AhrefSimpleCharts = charts.ahrefSimpleCharts;
+            ahrefDomain.AhrefNewAndLostCharts = charts.ahrefNewAndLostCharts;
             ahrefDomain.TopLevelDomain = await GetTld();
 
             return ahrefDomain;
@@ -395,7 +405,7 @@ namespace Domains_Scraper.Services
             var backlinksType = new List<BacklinksType>();
             var json = await _httpCaller.GetHtmlAhref("https://app.ahrefs.com/site-explorer/ajax/overview/backlinks-stats/" + _csHash);
             var obj = JObject.Parse(json);
-            var totalBacklinks = (int)obj.SelectToken("total_backlinks");
+            var totalBacklinks = (long)obj.SelectToken("total_backlinks");
             var BacklinksTypes = obj.SelectToken("BacklinksTypes");
 
             foreach (var BacklinksType in BacklinksTypes)
@@ -408,7 +418,7 @@ namespace Domains_Scraper.Services
             }
             return (backlinksType, totalBacklinks);
         }
-        private static async Task<List<OrganicChart>> GetOrganicDataData(string domainName)
+        public static async Task<List<OrganicChart>> GetOrganicDataData(string domainName)
         {
             var organicCharts = new List<OrganicChart>();
             var formData = new

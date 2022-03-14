@@ -22,8 +22,8 @@ namespace Domains_Scraper.Models
         public AhrefSimpleCharts AhrefSimpleCharts { get; set; } = new AhrefSimpleCharts();
         public AhrefNewAndLostCharts AhrefNewAndLostCharts { get; set; } = new AhrefNewAndLostCharts();
         public TopLevelDomain TopLevelDomain { get; set; } = new TopLevelDomain();
-        public long OrganicTraffic { get; set; }
-        public long OrganicKeyWords { get; set; }
-        public List<OrganicChart> OrganicCharts { get; set; } = new List<OrganicChart>();
+        //public long OrganicTraffic { get; set; }
+        //public long OrganicKeyWords { get; set; }
+        //public List<OrganicChart> OrganicCharts { get; set; } = new List<OrganicChart>();
     }
 }

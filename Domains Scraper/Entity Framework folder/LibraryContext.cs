@@ -7,7 +7,7 @@ namespace Domains_Scraper.Entity_Framework_folder
     public class LibraryContext : DbContext
     {
         public DbSet<SemrushDomain> SemrushDomain { get; set; }
-        public DbSet<AhrefDomain> AhrefDomain { get; set; }
+        //public DbSet<AhrefDomain> AhrefDomain { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

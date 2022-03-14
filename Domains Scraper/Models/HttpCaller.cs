@@ -62,7 +62,7 @@ namespace Domains_Scraper.Models
                 }
             } while (true);
         }
-        public async Task<string> PostJson(string url, string json, int maxAttempts = 1)
+        public async Task<string> PostJson(string url, string json, int maxAttempts = 20)
         {
             int tries = 0;
             var s = "";
@@ -70,17 +70,27 @@ namespace Domains_Scraper.Models
             {
                 try
                 {
-                    if (json!=null)
+                    if (json != null)
                     {
                         var content = new StringContent(json, Encoding.UTF8, "application/json");
                         // content.Headers.Add("x-appeagle-authentication", Token);
                         var r = await _httpClient.PostAsync(url, content);
-                        s = await r.Content.ReadAsStringAsync(); 
+                        s = await r.Content.ReadAsStringAsync();
                     }
                     else
                     {
                         var r = await _httpClient.PostAsync(url, null);
                         s = await r.Content.ReadAsStringAsync();
+                    }
+                    if (url.Contains("app.ahrefs.com") && s.Contains("InternalError"))
+                    {
+                        var hh= await GetHtml(url);
+                        if (tries == maxAttempts)
+                        {
+                            return s;
+                        }
+                        tries++;
+                        continue;
                     }
                     return s;
                 }
